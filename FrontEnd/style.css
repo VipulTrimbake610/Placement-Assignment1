@@ -1,0 +1,91 @@
+body {
+    /* width: 100%; */
+    background-color: rgba(211, 211, 211, 1);
+
+  }
+
+  form {
+    margin: 2% 1% !important;
+    width: 98%;
+    padding: 30px;
+    border: 2px solid darkblue;
+    border-radius: 10px;
+  }
+
+  section {
+    margin: 2% 1%;
+    width: 98%;
+    padding: 30px;
+    border: 2px solid darkblue;
+    border-radius: 10px;
+    background: #383838;
+  }
+
+  .searchBox {
+    background-color: darkgray;
+    padding: 0 10px;
+    border: 1px solid;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    transition: all 0.3s;
+  }
+
+  .searchBox:hover {
+    background-color: gray;
+    cursor: pointer;
+  }
+
+  .searchBox>input {
+    background-color: transparent;
+    width: 165px;
+    border: none;
+    color: white;
+  }
+
+  .searchBox>input:focus {
+    outline: none;
+  }
+
+  .searchBox>span {
+    cursor: pointer;
+    color: lightblue;
+    font-weight: bold;
+  }
+  .syncButton{
+    width: 100px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+/* Table Css */
+table{
+  font-size: 17px;
+  margin: 20px;
+}
+
+  /* Delete Icon Span */
+  .material-symbols-outlined{
+    font-size: 14px;
+    border-radius: 20px;
+    font-weight: bolder;
+    cursor: pointer;
+  }
+  .material-symbols-outlined:hover{
+    background-color: thistle !important;
+  }
+  .sp1{
+    background-color: coral !important;
+  }
+
+  /* Edit Icon Span */
+  .sp2{
+    background-color: greenyellow !important;
+    margin-left: 10px;
+  }
+
+  td{
+    padding: 10px 0;
+  }
