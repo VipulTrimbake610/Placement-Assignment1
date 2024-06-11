@@ -21,6 +21,11 @@ body {
     background: #383838;
   }
 
+  select{
+    padding: 0 10px;
+    background-color: lightcyan;
+    border-radius: 5px;
+  }
   .searchBox {
     background-color: darkgray;
     padding: 0 10px;
@@ -67,13 +72,13 @@ table{
 }
 
   /* Delete Icon Span */
-  .material-symbols-outlined{
+  #table .material-symbols-outlined{
     font-size: 14px;
     border-radius: 20px;
     font-weight: bolder;
     cursor: pointer;
   }
-  .material-symbols-outlined:hover{
+  #table .material-symbols-outlined:hover{
     background-color: thistle !important;
   }
   .sp1{

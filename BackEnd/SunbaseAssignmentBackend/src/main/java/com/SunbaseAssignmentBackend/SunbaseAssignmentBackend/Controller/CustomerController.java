@@ -2,7 +2,11 @@ package com.SunbaseAssignmentBackend.SunbaseAssignmentBackend.Controller;
 
 import com.SunbaseAssignmentBackend.SunbaseAssignmentBackend.Models.Customer;
 import com.SunbaseAssignmentBackend.SunbaseAssignmentBackend.Service.CustomerService;
+import jakarta.websocket.server.PathParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +18,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://127.0.0.1:5500") // Specify the allowed origin
 @RequestMapping("customer")
 public class CustomerController {
+    private static final Logger log = LoggerFactory.getLogger(CustomerController.class);
 //    Backend should have API for:
 //- Create a customer
 //- Update a customer
@@ -34,25 +39,23 @@ public class CustomerController {
         }
     }
 
-    @GetMapping("get-customer-list")
-    public ResponseEntity getCustomerList(){
+    @GetMapping("get-customer-list/{page}/{size}")
+    public Page<Customer> getCustomerList(@PathVariable int page, @PathVariable int size, @RequestParam String searchText, @RequestParam String searchBy){
         try{
-            List<Customer> customerList = customerService.getCustomerList();
-            return new ResponseEntity(customerList, HttpStatus.OK);
+            Page<Customer> customerList = customerService.getCustomerList(page,size,searchText,searchBy);
+            return customerList;
         }catch (Exception e){
-            return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+            return null;
         }
     }
 
     @GetMapping("get-customer-list-with-token")
-    public List<Customer> getCustomerListUsingToken(@RequestHeader("access_token") String token){
-        System.out.println("Hello");
-        System.out.println("token"+token);
+    public Page<Customer> getCustomerListUsingToken(@RequestHeader("access_token") String token){
         try{
             return customerService.getCustomerListUsingToken(token);
         }catch (Exception e){
             System.out.println(e.getMessage());
-            return new ArrayList<>();
+            return null;
         }
     }
 

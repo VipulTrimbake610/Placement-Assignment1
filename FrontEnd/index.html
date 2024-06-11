@@ -23,21 +23,16 @@
   <section>
     <div style="display:flex;column-gap: 20px;">
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal1">Add Customer</button>
-      <div class="dropdown">
-        <button class="btn dropdown-toggle" style="background-color: lightcyan;" type="button" data-bs-toggle="dropdown"
-          aria-expanded="true">
-          Search By
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">First Name</a></li>
-          <li><a class="dropdown-item" href="#">City</a></li>
-          <li><a class="dropdown-item" href="#">Email</a></li>
-          <li><a class="dropdown-item" href="#">Phone</a></li>
-        </ul>
-      </div>
-      <div class="searchBox">
-        <input type="text">
-        <span class="material-symbols-outlined">search</span>
+      <select id="select">
+        <option value="">Search By</option>
+        <option value="first_name">First Name</option>
+        <option value="city">City</option>
+        <option value="email">Email</option>
+        <option value="phone">Phone</option>
+      </select>
+      <div class="searchBox" id="searchBox">
+        <input type="search" name="search" >
+        <span class="material-symbols-outlined" onClick="handleSearch(event)">search</span>
       </div>
 
       <button type="button" class="btn btn-light syncButton" data-bs-toggle="modal" data-bs-target="#exampleModal2">Sync</button>
@@ -45,6 +40,12 @@
     <table class="table table-dark table-striped" id="table" >
       
     </table>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="btn btn-primary" onClick="handlePageButtons(event)" id="prev">Previous</li>
+        <li class="btn btn-primary" onClick="handlePageButtons(event)" style="margin-left: 15px;" id="next" >Next</li>
+      </ul>
+    </nav>
   </section>
 
   
@@ -125,5 +126,4 @@
     <script src="script.js"></script>
 
 </body>
-
 </html>

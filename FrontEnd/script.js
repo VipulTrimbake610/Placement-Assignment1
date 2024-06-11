@@ -26,30 +26,34 @@ const ServerPort = "http://localhost:8080/customer";
 // Main Data
 let mData;
 
+let page = 0;
+let pageSize = 5;
+
 //Fetching all the customers from the database
-fetch(`${ServerPort}/get-customer-list`)
+fetch(`${ServerPort}/get-customer-list/${page}/${pageSize}?searchText=&searchBy=`)
     .then(response => response.json())
-    .then(data => { mData = data; displayCustomers(data) })
+    .then(data => { mData = data; displayCustomers(data.content); })
     .catch(err => console.log(err))
 
 // Displaying all the fetched data
 function displayCustomers(data) {
-
+    table.innerHTML = "";
     // Adding Table Heading
-    let trHeading = document.createElement("tr");
-    for (let x in data[0]) {
-        if (x !== "uuid" && x !== "street") {
-            trHeading.innerHTML += `<th>${x[0].toUpperCase() + x.slice(1,).toLowerCase()}</th>`
-        }
-    }
-    trHeading.innerHTML += "<th>Actions</th>"
-    table.appendChild(trHeading);
+    if (data[0]) {
 
-    //Adding Table Data
-    for (let i = 0; i < data.length; i++) {
-        let uuid = data[i].uuid;
-        let trData = document.createElement("tr");
-        trData.innerHTML = `<td>${data[i].first_name}</td>
+        let trHeading = document.createElement("tr");
+        for (let x in data[0]) {
+            if (x !== "uuid" && x !== "street") {
+                trHeading.innerHTML += `<th>${x[0].toUpperCase() + x.slice(1,).toLowerCase()}</th>`
+            }
+        }
+        trHeading.innerHTML += "<th>Actions</th>"
+        table.appendChild(trHeading);
+
+        //Adding Table Data
+        for (let i = 0; i < data.length; i++) {
+            let trData = document.createElement("tr");
+            trData.innerHTML = `<td>${data[i].first_name}</td>
                                 <td>${data[i].last_name}</td>
                                 <td>${data[i].address}</td>
                                 <td>${data[i].city}</td>
@@ -58,7 +62,11 @@ function displayCustomers(data) {
                                 <td>${data[i].phone}</td>
                                 <td><span class="material-symbols-outlined sp1" onClick="deleteFun(event,${i})">remove</span>
                                 <span class="material-symbols-outlined sp2" onClick="editFun(event,${i})" data-bs-toggle="modal" data-bs-target="#exampleModal1">edit</span></td>`
-        table.appendChild(trData);
+            table.appendChild(trData);
+        }
+
+    } else {
+        table.innerHTML = "<h2>No Records Available!</h2>";
     }
 }
 
@@ -89,20 +97,42 @@ addUserbtn.addEventListener('click', function (e) {
             .then(response => response.text())
             .then(data => {
                 alert("Status : " + data)
+                location.reload();
             })
-            .catch(error => {
-                alert("Error : " + error);
-                console.error('Error:', error)
-            });
-        location.reload();
     }
 });
+
+// HandlingSearch Button
+function handleSearch(event) {
+    let searchBy = document.getElementById("select").value;
+    let searchText = document.querySelector("#searchBox > input").value;
+
+    fetch(`${ServerPort}/get-customer-list/${page}/${pageSize}?searchText=${searchText}&searchBy=${searchBy}`)
+        .then(response => response.json())
+        .then(data => { mData = data; displayCustomers(data.content); })
+}
+
+// Handling Page Buttons
+function handlePageButtons(event) {
+    if (event.target.id == "prev") {
+        if (page > 0) {
+            page--;
+        }
+    } else if (event.target.id == "next") {
+        if (mData.totalPages - 1 > page) {
+            page++;
+        }
+    }
+    console.log(mData.totalPages, page);
+    handleSearch();
+}
+
 
 // Deleting customer
 function deleteFun(event, i) {
     let response = confirm("Are you sure ?")
     if (response) {
-        let uuid = mData[i].uuid;
+        let uuid = mData.content[i].uuid;
         fetch(`${ServerPort}/delete-customer?id=${uuid}`, {
             method: "DELETE",
             headers: {
@@ -111,7 +141,6 @@ function deleteFun(event, i) {
         })
             .then(response => response.text())
             .then(data => alert("Status : " + data))
-            .catch(err => { alert("Error : " + err); console.log(err) })
 
         location.reload();
     }
@@ -144,15 +173,15 @@ function editFun(event, i) {
     addUserbtn.style.display = "none";
     updateUserbtn.style.display = "block";
 
-    editUuid = mData[i].uuid;
-    fname.value = mData[i].first_name;
-    lname.value = mData[i].last_name;
-    street.value = mData[i].street;
-    add.value = mData[i].address;
-    city.value = mData[i].city;
-    state.value = mData[i].state;
-    email.value = mData[i].email;
-    phone.value = mData[i].phone;
+    editUuid = mData.content[i].uuid;
+    fname.value = mData.content[i].first_name;
+    lname.value = mData.content[i].last_name;
+    street.value = mData.content[i].street;
+    add.value = mData.content[i].address;
+    city.value = mData.content[i].city;
+    state.value = mData.content[i].state;
+    email.value = mData.content[i].email;
+    phone.value = mData.content[i].phone;
 }
 // onclick of submit of updateModal updating data into the database
 updateUserbtn.addEventListener('click', function (e) {
@@ -189,33 +218,48 @@ updateUserbtn.addEventListener('click', function (e) {
     location.reload();
 })
 
-
 // 2nd Phase
 //Making api call for getting the token
-loginButton.addEventListener('click', async function(e){
+loginButton.addEventListener('click', async function (e) {
     let loginObj = {
         "login_id": loginId.value,
         "password": loginPassword.value
     }
     console.log(loginObj);
-    let response =await fetch(`https://qa.sunbasedata.com/sunbase/portal/api/assignment_auth.jsp`,{
-            method:'POST',
+
+    let tokenObj;
+    try {
+        let response = await fetch(`https://qa.sunbasedata.com/sunbase/portal/api/assignment_auth.jsp`, {
+            method: 'POST',
             body: JSON.stringify(loginObj)
         });
-    let tokenObj = await response.json();
-    // console.log(token);
+        tokenObj = await response.json();
+        console.log(tokenObj);
+    } catch (err) {
+        alert("Please Enter correct credentials!");
+    }
 
-    let response2 = await fetch(`${ServerPort}/get-customer-list-with-token`,{
-        method:'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'access_token':`${tokenObj.access_token}`
-          }
-    })
-    console.log(response2);
-    let anotherData = await response2.json();
-    location.reload();
 
+    if (tokenObj.access_token) {
+        try {
+            alert("Please Wait!")
+            let response2 = await fetch(`${ServerPort}/get-customer-list-with-token`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'access_token': `${tokenObj.access_token}`
+                }
+            })
+            let anotherData = await response2.json();
+            mData = anotherData;
+            displayCustomers(mData.content);
+            console.log("Another : ", anotherData);
+            location.reload();
+        } catch (err) {
+            alert(err)
+        }
+    }
+    // Making Another api call for getting Sunbase Data thorugh the backend.
 })
 
 

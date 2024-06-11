@@ -2,14 +2,15 @@ package com.SunbaseAssignmentBackend.SunbaseAssignmentBackend.Service;
 
 import com.SunbaseAssignmentBackend.SunbaseAssignmentBackend.Models.Customer;
 import com.SunbaseAssignmentBackend.SunbaseAssignmentBackend.Repository.CustomerRepository;
-import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -32,28 +33,55 @@ public class CustomerService {
             }
     }
 
-    public List<Customer> getCustomerList() throws Exception{
-       return customerRepository.findAll();
+    public Page<Customer> getCustomerList(int page, int size, String searchText, String searchBy) throws Exception{
+        Pageable pageable = PageRequest.of(page,size);
+        if (searchBy.equals("first_name")){
+               return customerRepository.searchCustomerByName(searchText,pageable);
+       }else if (searchBy.equals("city")){
+           return customerRepository.searchCustomerByCity(searchText,pageable);
+       }else if (searchBy.equals("email")){
+           return customerRepository.searchCustomerByEmail(searchText,pageable);
+       }else if (searchBy.equals("phone")){
+           return customerRepository.searchCustomerByPhone(searchText,pageable);
+       }else{
+           return customerRepository.findAll(PageRequest.of(page,size));
+       }
     }
 
-    public List<Customer> getCustomerListUsingToken(String token) throws Exception{
+    public Page<Customer> getCustomerListUsingToken(String token) throws Exception{
         RestTemplate restTemplate = new RestTemplate();
         URI uri = URI.create("https://qa.sunbasedata.com/sunbase/portal/api/assignment.jsp?cmd=get_customer_list");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON); // Set content type as needed
-        headers.set("Authorization", "Bearer "+ token); // Set your authorization token
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer "+ token);
 
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
         ResponseEntity<List<Customer>> response = restTemplate.exchange(uri, HttpMethod.GET, entity,  new ParameterizedTypeReference<List<Customer>>() {});
         List<Customer> result = response.getBody();
 
-//        Storing all the list of customers got from sunbase into the db
-        customerRepository.saveAll(result);
+//        Storing all the list of customers got from sunbase via the Token into the db
+        for(Customer customer : result){
+            String custMail = customer.getEmail();
+            Customer customer1 = customerRepository.findCustomerByEmail(custMail);
+
+            if(customer1 == null && customer.getEmail().endsWith("@gmail.com")){
+                customerRepository.save(customer);
+            }else if(customer1 != null){
+                customer1.setFirst_name(customer.getFirst_name());
+                customer1.setLast_name(customer.getLast_name());
+                customer1.setStreet(customer.getStreet());
+                customer1.setAddress(customer.getAddress());
+                customer1.setCity(customer.getCity());
+                customer1.setState(customer.getState());
+                customer1.setPhone(customer.getPhone());
+                customerRepository.save(customer1);
+            }
+        }
 
 //        returing all the data present in the db.
-      return customerRepository.findAll();
+      return customerRepository.findAll(PageRequest.of(0,5));
     }
 
 
