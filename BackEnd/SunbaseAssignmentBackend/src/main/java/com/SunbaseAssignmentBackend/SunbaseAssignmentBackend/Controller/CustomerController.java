@@ -29,6 +29,7 @@ public class CustomerController {
     @Autowired
     CustomerService customerService;
 
+    // Adding Customer to the db
     @PostMapping("add-customer")
     public ResponseEntity addCustomer(@RequestBody Customer customer){
         try{
@@ -39,6 +40,8 @@ public class CustomerController {
         }
     }
 
+    // This api will return list of products.
+    // pagination, Sorting and Searching implemented in the Service layer of this Api.
     @GetMapping("get-customer-list/{page}/{size}")
     public Page<Customer> getCustomerList(@PathVariable int page, @PathVariable int size, @RequestParam String searchText, @RequestParam String searchBy){
         try{
@@ -49,6 +52,10 @@ public class CustomerController {
         }
     }
 
+//    Remote Backend Api has implemented in this function.
+//    This api will call sunbase api to get the data. and then store the data into the database.
+//    if any data is already present in the db it will get updated otherwise will get added.
+//    Note : Data is getting checked wheer its  present or not in the db based on email address.
     @GetMapping("get-customer-list-with-token")
     public Page<Customer> getCustomerListUsingToken(@RequestHeader("access_token") String token){
         try{
@@ -59,7 +66,8 @@ public class CustomerController {
         }
     }
 
-
+    // Simple Update API will check if the customer is present it will update.
+    // otherwise throw an customerDoent'tExist exception.
     @PutMapping("update-customer")
     public ResponseEntity updateCustomer(@RequestBody Customer customer){
         try{
@@ -70,7 +78,8 @@ public class CustomerController {
         }
     }
 
-
+    // Simple delete API will check if the customer is present it will delete.
+    // otherwise throw an customerDoent'tExist exception.
     @DeleteMapping("delete-customer")
     public ResponseEntity deleteCustomer(@RequestParam String id){
         try{
@@ -80,8 +89,5 @@ public class CustomerController {
             return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
-//
-//    @GetMapping("get-customer")
-//
 
 }

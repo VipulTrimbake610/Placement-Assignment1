@@ -49,6 +49,8 @@ public class CustomerService {
     }
 
     public Page<Customer> getCustomerListUsingToken(String token) throws Exception{
+
+        // Here the remote api is getting called.
         RestTemplate restTemplate = new RestTemplate();
         URI uri = URI.create("https://qa.sunbasedata.com/sunbase/portal/api/assignment.jsp?cmd=get_customer_list");
 
@@ -62,6 +64,11 @@ public class CustomerService {
         List<Customer> result = response.getBody();
 
 //        Storing all the list of customers got from sunbase via the Token into the db
+//        If Email exist then data will get updated otherwise new record will be added.
+//        Also validating the email like
+//        1. Email should not be null
+//        2. Email should end with @gmail.com
+
         for(Customer customer : result){
             String custMail = customer.getEmail();
             Customer customer1 = customerRepository.findCustomerByEmail(custMail);
